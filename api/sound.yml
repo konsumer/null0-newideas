@@ -19,37 +19,20 @@ stop_sound:
 
 new_sfx:
   args:
-    params: SfxParams*
+    params: SfxParams
   returns: Sound
   description: Create a new sound-effect from some sfxr params
 
 preset_sfx:
   args:
-    params: SfxParams*
     type: SfxPresetType
-  returns: void
+  returns: SfxParams
   description: Generate randomized preset sfxr params
-
-randomize_sfx:
-  args:
-    params: SfxParams*
-    waveType: SfxWaveType
-  returns: void
-  description: Randomize sfxr params
-
-mutate_sfx:
-  args:
-    params: SfxParams*
-    range: f32
-    mask: u32
-  returns: void
-  description: Randomly mutate sfxr params
 
 load_sfx:
   args:
-    params:  SfxParams*
     filename: string
-  returns: void
+  returns: SfxParams
   description: Create a new sfxr from a .rfx file
 
 unload_sound:

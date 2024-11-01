@@ -3,7 +3,10 @@
 .PHONY: help clean run
 
 help: ## Get help with available make commands
+	@echo "Run 'make' then one of these target-names, like 'make help':"
+	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@echo ""
 
 docs/host.mjs: host/*
 	cd host && make ../docs/host.mjs
@@ -21,7 +24,7 @@ cart-c: docs/cartc.null0 ## Build a cart made with C
 carts: cart-as cart-c ## Build both carts
 
 clean: ## Delete any built files
-	rm -f docs/*.mjs docs/*.wasm docs/*.null0 host/build cartc/build cartas/build
+	rm -f null0 docs/*.mjs docs/*.wasm docs/*.null0 host/build cartc/build cartas/build
 
 native: host/**/* ## Build native null0 runtime
 	cd host && make ../null0

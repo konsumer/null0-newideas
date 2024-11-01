@@ -12,27 +12,37 @@
       color: #fff;
       padding: 20px;
     }
-    #stdio {
-      height: 50%;
+    #stdio, #screens {
       display: flex;
       gap: 10px;
     }
-    textarea {
+    #screens {
+      margin-bottom: 1em;
+      align-items: center;
+      justify-content: center;
+    }
+    #stdio {
+      height: 50%;
+    }
+    .stdio {
       flex-grow: 1;
       background: #000;
       color: #fff;
       padding: 10px;
       height: 100%;
+      border: 1px solid #fff;
+      overflow-x: auto;
+      font-family: monospace;
     }
-    textarea::-webkit-scrollbar {
+    .stdio::-webkit-scrollbar {
       width: 1em;
     }
 
-    textarea::-webkit-scrollbar-track {
+    .stdio::-webkit-scrollbar-track {
       -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
     }
 
-    textarea::-webkit-scrollbar-thumb {
+    .stdio::-webkit-scrollbar-thumb {
       background-color: darkgrey;
       outline: 1px solid slategrey;
       cursor: grab;
@@ -40,10 +50,12 @@
   </style>
 </head>
 <body>
-
-<canvas id="null0"></canvas>
+<div id="screens">
+  <canvas id="canvasc"></canvas>
+  <canvas id="canvasas"></canvas>
+</div>
 <div id="stdio">
-  <textarea id="out"></textarea>
+  <div class="stdio"id="out"></div>
 </div>
 <script type="importmap">
   {
@@ -51,15 +63,18 @@
       "easywasi": "https://esm.sh/easywasi",
       "@zenfs/core": "https://esm.sh/@zenfs/core",
       "@zenfs/dom": "https://esm.sh/@zenfs/dom",
-      "@zenfs/zip": "https://esm.sh/@zenfs/zip"
+      "@zenfs/zip": "https://esm.sh/@zenfs/zip",
+      "ansi-html": "https://esm.sh/ansi-html"
     }
   }
 </script>
 <script type="module">
 import { WasiPreview1 } from 'easywasi'
-import { configure, InMemory, fs } from '@zenfs/core';
-import { IndexedDB } from '@zenfs/dom';
-import { Zip } from '@zenfs/zip';
+import { configure, InMemory, fs } from '@zenfs/core'
+import { IndexedDB } from '@zenfs/dom'
+import { Zip } from '@zenfs/zip'
+import ansiHTML from 'ansi-html'
+
 import hostSetup from './host.mjs'
 
 // TODO: figure out how to have isolated instances of fs, so it's not shared between multiple carts
@@ -78,23 +93,68 @@ await configure({
   }
 })
 
-// make it more like an output-only terminal
-document.getElementById('out').spellcheck = false
-document.getElementById('out').disabled = true
+// polyfill gives ArrayBuffer.slice to firefox
+if (!ArrayBuffer.prototype.slice) {
+  ArrayBuffer.prototype.slice = function (start, end) {
+    var that = new Uint8Array(this)
+    if (end == undefined) {
+      end = that.length
+    }
+    var result = new ArrayBuffer(end - start)
+    var resultArray = new Uint8Array(result)
+    for (var i = 0; i < resultArray.length; i++) {
+      resultArray[i] = that[i + start]
+    }
+    return result
+  }
+}
 
-async function setupCart(fs, mainLocation='/mnt/cart/main.wasm', args=['null0'], env={}) {
-  const host = await hostSetup({cartfs: fs})
+async function setupCart(canvas, fs, mainLocation='/mnt/cart/main.wasm', args=['null0'], env={}) { 
   const cartWasm = fs.readFileSync(mainLocation)
   const wasi_snapshot_preview1 = new WasiPreview1({ fs, args, env })
   const { instance } = await WebAssembly.instantiate(cartWasm, {
-    wasi_snapshot_preview1
+    wasi_snapshot_preview1,
+    null0: {
+      // send arguments to host scratch-space
+      args_to_host(pCart, size) {
+        if (size > 1024 * 1024) {
+          throw new Error('Trying to send too large of args')
+        }
+        const pHost = host._null0_get_shared()
+        // console.log('args_to_host', {pCart, size, pHost})
+        host.HEAPU32[pHost/4] = size
+        host.HEAPU8.set(instance.exports.memory.buffer.slice(pCart+4, pCart+size+4), pHost)
+      },
+
+      // get just the size from current ret-buffer
+      ret_size() {
+        const pHost = host._null0_get_shared()
+        const size = host.HEAPU32[pHost / 4]
+        // console.log('ret_size', { pHost, size })
+        return size
+      },
+
+      // get return value from host scratch-space
+      ret_from_host(pCart) {
+        const pHost = host._null0_get_shared()
+        const size = host.HEAPU32[pHost / 4]
+        // console.log('ret_from_host', {pCart, pHost, size})
+        new Uint8Array(instance.exports.memory.buffer).set(host.HEAPU8.slice(pHost+4, pHost+size+4), pCart)
+      },
+
+      // trigger action in host, from cart
+      call(op) {
+        // console.log('call', op)
+        host._null0_call(op)
+      }
+    }
   })
   
   wasi_snapshot_preview1.setup(instance.exports)
 
   function addText(t, buffer) {
-    t.value += wasi_snapshot_preview1.textDecoder.decode(buffer)
-    t.selectionStart = t.selectionEnd = t.value.length
+    t.innerHTML += ansiHTML(wasi_snapshot_preview1.textDecoder.decode(buffer)).replace(/\n/g, '<br/>')
+    t.selectionStart = t.selectionEnd = t.innerHTML.length
     t.blur()
     t.focus()
     t.blur()
@@ -102,21 +162,21 @@ async function setupCart(fs, mainLocation='/mnt/cart/main.wasm', args=['null0'],
   wasi_snapshot_preview1.stdout = (buffer) => addText(document.getElementById('out'), buffer)
   // wasi_snapshot_preview1.stderr = (buffer) => addText(document.getElementById('err'), buffer)
 
-  if (instance.exports._initialize) {
-    instance.exports._initialize()
-  }
-  if (instance.exports._start) {
-    instance.exports._start()
-  }
-  if (instance.exports.load) {
-    instance.exports.load()
+  const host = await hostSetup({cartfs: fs, canvas, cart: instance.exports })
+
+  if (instance.exports.update) {
+    const u = () => {
+      instance.exports.update()
+      requestAnimationFrame(u)
+    }
+    u()
   }
 
   return { ...instance.exports, host }
 }
 
-const cartc = await setupCart(fs)
-const cartas = await setupCart(fs,'/mnt/as/main.wasm' )
+const cartc = await setupCart(document.getElementById('canvasc'), fs)
+const cartas = await setupCart(document.getElementById('canvasas'), fs, '/mnt/as/main.wasm')
 
 </script>
 </body>

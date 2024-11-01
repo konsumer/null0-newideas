@@ -89,7 +89,7 @@ draw_circle:
 
 draw_polygon:
   args:
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void
@@ -97,7 +97,7 @@ draw_polygon:
 
 draw_polyline:
   args:
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void
@@ -478,7 +478,7 @@ draw_circle_on_image:
 draw_polygon_on_image:
   args:
     destination: Image
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void
@@ -487,7 +487,7 @@ draw_polygon_on_image:
 draw_polyline_on_image:
   args:
     destination: Image
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void
@@ -617,7 +617,7 @@ draw_circle_outline:
 
 draw_polygon_outline:
   args:
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void
@@ -694,7 +694,7 @@ draw_circle_outline_on_image:
 draw_polygon_outline_on_image:
   args:
     destination: Image
-    points: Vector*
+    points: Vector[]
     numPoints: i32
     color: Color
   returns: void

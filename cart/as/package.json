@@ -21,6 +21,6 @@
     }
   },
   "dependencies": {
-    "as-wasi": "^0.6.0"
+    "@assemblyscript/wasi-shim": "^0.1.0"
   }
 }
