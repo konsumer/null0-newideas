@@ -277,13 +277,13 @@ measure_text:
   args:
     font: Font
     text: string
-  returns: Dimensions
+  returns: Vector
   description: Measure the size of some text
 
 measure_image:
   args:
     image: Image
-  returns: Dimensions
+  returns: Vector
   description: Meaure an image (use 0 for screen)
 
 load_font_tty:

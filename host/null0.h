@@ -42,8 +42,8 @@ typedef struct {
 static Null0Mem cart_shared;
 static pntr_app* null0app;
 
-static pntr_image* images = NULL;
-static pntr_font* fonts = NULL;
+static pntr_image** images = NULL;
+static pntr_font** fonts = NULL;
 
 typedef enum {
   OP_CLEAR,
@@ -53,25 +53,65 @@ typedef enum {
   OP_MEASURE_TEXT
 } Null0Op;
 
+typedef struct {
+  unsigned int r;
+  unsigned int g;
+  unsigned int b;
+  unsigned int a;
+} Null0Color;
 
-void null0_clear() {}
-void null_load_image() {}
-void null0_draw_image() {}
-void null0_draw_text() {}
-void null0_measure_text() {}
+static unsigned int cart_arg_offset = 0;
+static unsigned int cart_ret_offset = 0;
+
+pntr_color cart_arg_Color(){
+  pntr_color ret = pntr_new_color(cart_shared.data[cart_arg_offset], cart_shared.data[cart_arg_offset + 1], cart_shared.data[cart_arg_offset + 2], cart_shared.data[cart_arg_offset + 3]);
+  cart_arg_offset += 4;
+  return ret;
+}
+
+char* cart_arg_string() {
+  char* ret = {};
+  strcpy(ret,  (char*)(&cart_shared.data + cart_arg_offset));
+  cart_arg_offset += strlen(ret) + 1;
+  return ret;
+}
+
+int cart_arg_int() {
+  int ret = 0;
+  memcpy(&ret, &cart_shared.data + cart_arg_offset, sizeof(ret));
+  cart_arg_offset += sizeof(ret);
+  return ret;
+}
+
+pntr_image* cart_arg_Image() {
+  return images[cart_arg_int()];
+}
+
+pntr_image* cart_arg_Font() {
+  return fonts[cart_arg_int()];
+}
+
+void cart_ret_Image(pntr_image* val) {
+  unsigned int idx = cvector_size(images);
+  cvector_push_back(images, val);
+  memcpy(&cart_shared.data + cart_ret_offset, &idx, sizeof(idx));
+  cart_ret_offset += sizeof(idx);
+}
+
+void cart_ret_Vector(pntr_vector val) {
+
+}
 
 // let cart call a function
 void null0_call(Null0Op op) {
-  unsigned int s = 0;
-  char* filename;
-  pntr_color color = {};
-
+  cart_arg_offset = 0;
+  cart_ret_offset = 0;
   switch(op) {
-    case OP_CLEAR: null0_clear(); break;
-    case OP_LOAD_IMAGE: null_load_image(); break;
-    case OP_DRAW_IMAGE: null0_draw_image(); break;
-    case OP_DRAW_TEXT: null0_draw_text(); break;
-    case OP_MEASURE_TEXT: null0_measure_text(); break;
+    case OP_CLEAR: pntr_clear_background(images[0], cart_arg_Color()); break;
+    case OP_LOAD_IMAGE: cart_ret_Image(pntr_load_image(cart_arg_string())); break;
+    case OP_DRAW_IMAGE: pntr_draw_image(images[0], cart_arg_Image(), cart_arg_int(), cart_arg_int()); break;
+    case OP_DRAW_TEXT: pntr_draw_text(images[0], cart_arg_Font(), cart_arg_string(), cart_arg_int(), cart_arg_int(), cart_arg_Color()); break;
+    case OP_MEASURE_TEXT: cart_ret_Vector(pntr_measure_text(cart_arg_Font(), cart_arg_string())); break;
   }
 }
 
@@ -87,26 +127,15 @@ EM_JS(void, _cart_load, (), {
     console.log('You should probably set host.cart.');
   }
   if (Module?.cart?._initialize) {
-    // console.log('_initialize');
     Module.cart._initialize();
   }
   if (Module?.cart?._start) {
-    // console.log('_start');
     Module.cart._start();
   }
   if (Module?.cart?.load) {
-    // console.log('load');
     Module.cart.load();
   }
 })
-
-void cart_load(pntr_app* app) {
-  null0app = app;
-  cvector_push_back(images, *app->screen);
-  cvector_push_back(fonts, *pntr_load_font_default());
-  cart_shared = (Null0Mem) { .size=0, .data={}}; 
-  _cart_load();
-}
 
 EM_JS(void, _cart_update, (), {
   if (Module?.cart?.update) {
@@ -114,25 +143,48 @@ EM_JS(void, _cart_update, (), {
   }
 })
 
-void cart_update(pntr_app* app) {
-  _cart_update();
-}
-
 EM_JS(void, _cart_unload, (), {
   if (Module?.cart?.unload) {
     Module.cart.unload();
   }
 })
 
+
+#else // not EMSCRIPTEN, setup WAMR
+
+void _cart_load() {
+  unsigned int size = 0;
+  unsigned char* wasBytes = pntr_app_load_arg_file(null0app, &size);
+  
+  // TODO: setup wasm
+  // TODO: expose: args_to_host, ret_size, ret_from_host, call
+  // TODO: call cart load()
+}
+void _cart_update() {
+  // TODO: call cart update()
+}
+void _cart_unload() {
+  // TODO: call cart unload()
+}
+
+#endif
+
+void cart_load(pntr_app* app) {
+  null0app = app;
+  cvector_push_back(images, app->screen);
+  cvector_push_back(fonts, pntr_load_font_default());
+  cart_shared = (Null0Mem) { .size=0, .data={}};
+  _cart_load();
+}
+
+void cart_update(pntr_app* app) {
+  _cart_update();
+}
+
 void cart_unload(pntr_app* app) {
   free(cart_shared.data);
   _cart_unload();
+  // TODO: free resources
 }
 
 
-#else
-// TODO: implement for WAMR
-void cart_load(pntr_app* app) {}
-void cart_update(pntr_app* app) {}
-void cart_unload(pntr_app* app) {}
-#endif

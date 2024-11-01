@@ -18,11 +18,6 @@ void _null0_export_free(void* ptr) {
 }
 
 typedef struct {
-  unsigned int width;
-  unsigned int height;
-} Dimensions;
-
-typedef struct {
   int x;
   int y;
 } Vector;
@@ -278,7 +273,7 @@ typedef struct FileInfo {
   int64_t createtime;    /**< like modtime, but for file creation time */
   int64_t accesstime;    /**< like modtime, but for file access time */
   FileType filetype; /**< File? Directory? Symlink? */
-  bool readonly;     /**< non-zero if read only, zero if writable. */
+  bool readonly;     /**< true if read only, false if writable. */
 } FileInfo;
 
 #define WIDTH 320
@@ -336,6 +331,7 @@ void null0_ret_from_host(void* pCart);
 
 // this will all be generated later
 
+// these are for sending multiple args
 typedef struct {
   unsigned int src;
   int posX;
@@ -356,31 +352,31 @@ void clear(Color color) {
 }
 
 unsigned int load_image(char* filename) {
-  null0_args_to_host(filename, strlen(filename) + 1);
-  null0_call(OP_LOAD_IMAGE);
+  // null0_args_to_host(filename, strlen(filename) + 1);
+  // null0_call(OP_LOAD_IMAGE);
   unsigned int ret = 0;
-  null0_ret_from_host(&ret);
+  // null0_ret_from_host(&ret);
   return ret;
 }
 
 void draw_image(unsigned int src, int posX, int posY) {
-  Null0DrawImage args = {
-    .src=src,
-    .posX=posX,
-    .posY=posY
-  };
-  null0_args_to_host(&args, sizeof(args));
-  null0_call(OP_DRAW_IMAGE);
+  // Null0DrawImage args = {
+  //   .src=src,
+  //   .posX=posX,
+  //   .posY=posY
+  // };
+  // null0_args_to_host(&args, sizeof(args));
+  // null0_call(OP_DRAW_IMAGE);
 }
 
 void draw_text(unsigned int font, char* text, int posX, int posY, Color color) {
-  Null0DrawText args = {
-    .font=font,
-    .posX=posX,
-    .posY=posY,
-    .color=color
-  };
-  strcpy(args.text, text);
-  null0_args_to_host(&args, 17 + strlen(text));
-  null0_call(OP_DRAW_TEXT);
+  // Null0DrawText args = {
+  //   .font=font,
+  //   .posX=posX,
+  //   .posY=posY,
+  //   .color=color
+  // };
+  // strcpy(args.text, text);
+  // null0_args_to_host(&args, 17 + strlen(text));
+  // null0_call(OP_DRAW_TEXT);
 }

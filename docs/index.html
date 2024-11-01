@@ -93,22 +93,6 @@ await configure({
   }
 })
 
-// polyfill gives ArrayBuffer.slice to firefox
-if (!ArrayBuffer.prototype.slice) {
-  ArrayBuffer.prototype.slice = function (start, end) {
-    var that = new Uint8Array(this)
-    if (end == undefined) {
-      end = that.length
-    }
-    var result = new ArrayBuffer(end - start)
-    var resultArray = new Uint8Array(result)
-    for (var i = 0; i < resultArray.length; i++) {
-      resultArray[i] = that[i + start]
-    }
-    return result
-  }
-}
-
 async function setupCart(canvas, fs, mainLocation='/mnt/cart/main.wasm', args=['null0'], env={}) { 
   const cartWasm = fs.readFileSync(mainLocation)
   const wasi_snapshot_preview1 = new WasiPreview1({ fs, args, env })
@@ -123,7 +107,9 @@ async function setupCart(canvas, fs, mainLocation='/mnt/cart/main.wasm', args=['
         const pHost = host._null0_get_shared()
         // console.log('args_to_host', {pCart, size, pHost})
         host.HEAPU32[pHost/4] = size
-        host.HEAPU8.set(instance.exports.memory.buffer.slice(pCart+4, pCart+size+4), pHost)
+        host.HEAPU8.set(instance.exports.memory.buffer.slice(pCart+4, pCart+4+size), pHost + 4)
+        // console.log(host.HEAPU8.slice(pHost, pHost + size))
+        // console.log(new Uint8Array(instance.exports.memory.buffer).slice(pCart+4, pCart+size+4))
       },
 
       // get just the size from current ret-buffer
