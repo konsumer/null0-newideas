@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@assemblyscript/wasi-shim": "^0.1.0"
+  }
+}
