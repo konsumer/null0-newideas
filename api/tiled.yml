@@ -1,0 +1,96 @@
+load_map:
+  args:
+    filename: string
+  returns: TileMap
+  description: Load a Tiled map from a file
+
+unload_map:
+  args:
+    map: TileMap
+  returns: void
+  description: Unload a Tiled map
+
+draw_map:
+  args:
+    map: TileMap
+    posX: i32
+    posY: i32
+    tint: Color
+  returns: void
+  description: Draw a tiled map on the screen
+
+draw_map_on_image:
+  args:
+    dst: Image
+    map: TileMap
+    posX: i32
+    posY: i32
+    tint: Color
+  returns: void
+  description: Draw a tiled map on an image
+
+draw_tile:
+  args:
+    map: TileMap
+    gid: u32
+    posX: i32
+    posY: i32
+    tint: Color
+  returns: void
+  description: Draw a single tile on screen, by gid
+
+draw_tile_on_image:
+  args:
+    dst: Image
+    map: TileMap
+    gid: u32
+    posX: i32
+    posY: i32
+    tint: Color
+  returns: void
+  description: Draw a single tile on an image, by tile-id
+
+draw_layer:
+  args:
+    map: TileMap
+    layerName: string
+    posX: i32
+    posY: i32
+  returns: void
+  description: Draw a layer on the screen
+
+draw_layer_on_image:
+  args:
+    dst: Image
+    map: TileMap
+    layerName: string
+    posX: i32
+    posY: i32
+  returns: void
+  description: Draw a layer on an image
+
+update_map:
+  args:
+    map: TileMap
+    deltaTime: f32
+  returns: void
+  description: Update the animations for the map.
+
+layer_get_gid:
+  args:
+    map: TileMap
+    layerName: string
+    column: u32
+    row: u32
+  returns: u32
+  description: Get the tile-id for a tile at a coordinate on a layer
+
+layer_set_gid:
+  args:
+    map: TileMap
+    layerName: string
+    column: u32
+    row: u32
+    gid: u32
+  returns: void
+  description: Set a tile to a specific tile-id, on a layer
