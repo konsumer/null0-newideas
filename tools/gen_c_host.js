@@ -11,10 +11,13 @@ const now = new Date()
 
 out.push(`// Null0 Host API
 
+#pragma once
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "cvector.h"
 
 #ifdef EMSCRIPTEN
@@ -69,6 +72,31 @@ static pntr_app* null0app;
 static pntr_image** images = NULL;
 static pntr_font** fonts = NULL;
 static pntr_sound** sounds = NULL;
+static cute_tiled_map_t** maps = NULL;
+
+unsigned int null0_add_image(pntr_image* val) {
+  unsigned int idx = cvector_size(images);
+  cvector_push_back(images, val);
+  return idx;
+}
+
+unsigned int null0_add_font(pntr_font* val) {
+  unsigned int idx = cvector_size(fonts);
+  cvector_push_back(fonts, val);
+  return idx;
+}
+
+unsigned int null0_add_sound(pntr_sound* val) {
+  unsigned int idx = cvector_size(sounds);
+  cvector_push_back(sounds, val);
+  return idx;
+}
+
+unsigned int null0_add_map(cute_tiled_map_t* val) {
+  unsigned int idx = cvector_size(maps);
+  cvector_push_back(maps, val);
+  return idx;
+}
 
 `)
 
@@ -83,7 +111,7 @@ await walkCats(({ catName, apiFilename, api }) => {
     const call = `null0_${funcName}(${Object.values(func.args).map(a => `cart_arg_get_${types[a].name}(${types[a].name.includes('_array') || types[a].name === 'bytes' ? 'len' : ''})`).join(', ')})`
     actions.push(`case ${op}: ${func.returns === 'void' ? call : ` cart_ret_set_${types[func.returns].name}(${call}${types[func.returns].name === 'bytes' || types[func.returns].name.includes('_array') ? ', len' : ''})`}; break;`)
     // api.push(`${func.returns === 'void' ? '' : `${types[func.returns].host} `} null0_${funcName}(${Object.entries(func.args).map(([name, type]) => `${type} ${name}`).join(', ')});`)
-    null0funcs.push(`${types[func.returns].host} null0_${funcName}(${Object.entries(func.args).map(([name, type]) => `${types[type].host} ${name}`).join(', ')}) {
+    null0funcs.push(`// ${func.description}\n${types[func.returns].host} null0_${funcName}(${Object.entries(func.args).map(([name, type]) => `${types[type].host} ${name}`).join(', ')}) {
   // TODO: STUB${func.returns === 'void' ? '' : '\n  return {0};'}
 }`)
   }

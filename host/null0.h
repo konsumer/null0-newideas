@@ -1,9 +1,12 @@
 // Null0 Host API
 
+#pragma once
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "cvector.h"
 
 #ifdef EMSCRIPTEN
@@ -58,549 +61,714 @@ static pntr_app* null0app;
 static pntr_image** images = NULL;
 static pntr_font** fonts = NULL;
 static pntr_sound** sounds = NULL;
+static cute_tiled_map_t** maps = NULL;
 
+unsigned int null0_add_image(pntr_image* val) {
+  unsigned int idx = cvector_size(images);
+  cvector_push_back(images, val);
+  return idx;
+}
 
+unsigned int null0_add_font(pntr_font* val) {
+  unsigned int idx = cvector_size(fonts);
+  cvector_push_back(fonts, val);
+  return idx;
+}
+
+unsigned int null0_add_sound(pntr_sound* val) {
+  unsigned int idx = cvector_size(sounds);
+  cvector_push_back(sounds, val);
+  return idx;
+}
+
+unsigned int null0_add_map(cute_tiled_map_t* val) {
+  unsigned int idx = cvector_size(maps);
+  cvector_push_back(maps, val);
+  return idx;
+}
+
+pntr_color null0_pntr_color(Null0Color c) {
+  return pntr_new_color(c.r, c.g, c.b, c.a);
+}
+
+// Log a string
 void null0_trace(char* str) {
-  // TODO: STUB
+  printf("%s\n", str);
 }
 
+// Get system-time (ms) since unix epoch
 uint64_t null0_current_time() {
-  // TODO: STUB
-  return {0};
+  struct timespec t;
+  clock_gettime(CLOCK_REALTIME, &t);
+  return t.tv_sec * 1000 + (t.tv_nsec + 500000) / 1000000;
 }
 
+// Get the change in time (seconds) since the last update run
 float null0_delta_time() {
-  // TODO: STUB
-  return {0};
+  return pntr_app_delta_time(null0_app);
 }
 
-int null0_random_int(int min, int max) {
-  // TODO: STUB
-  return {0};
+// Get a random integer between 2 numbers
+int32_t null0_random_int(int32_t min, int32_t max) {
+  return pntr_app_random(null0_app, min, max);
 }
 
+// Load a Tiled map from a file
 unsigned int null0_load_map(char* filename) {
-  // TODO: STUB
-  return {0};
+  return null0_add_map(pntr_load_tiled(filename));
 }
 
+// Unload a Tiled map
 void null0_unload_map(unsigned int map) {
-  // TODO: STUB
+  pntr_unload_tiled(maps[map]);
 }
 
+// Draw a tiled map on the screen
 void null0_draw_map(unsigned int map, int posX, int posY, Null0Color tint) {
-  // TODO: STUB
+  pntr_draw_tiled(images[0], maps[map], posX, posY, null0_pntr_color(tint));
 }
 
+// Draw a tiled map on an image
 void null0_draw_map_on_image(unsigned int dst, unsigned int map, int posX, int posY, Null0Color tint) {
-  // TODO: STUB
+  pntr_draw_tiled(images[dst], maps[map], posX, posY, null0_pntr_color(tint));
 }
 
+// Draw a single tile on screen, by gid
 void null0_draw_tile(unsigned int map, unsigned int gid, int posX, int posY, Null0Color tint) {
-  // TODO: STUB
+  pntr_draw_tiled_tile(images[0], maps[map], gid, posX, posY, null0_pntr_color(tint));
 }
 
+// Draw a single tile on an image, by tile-id
 void null0_draw_tile_on_image(unsigned int dst, unsigned int map, unsigned int gid, int posX, int posY, Null0Color tint) {
-  // TODO: STUB
+  pntr_draw_tiled_tile(images[dst], maps[map], gid, posX, posY, null0_pntr_color(tint));
 }
 
+// Draw a layer on the screen
 void null0_draw_layer(unsigned int map, char* layerName, int posX, int posY) {
-  // TODO: STUB
+  cute_tiled_layer_t* layer = pntr_tiled_layer(maps[map], layerName);
+  pntr_draw_tiled_layer_tilelayer(images[0], maps[map], layer, posX, posY, null0_pntr_color(tint));
 }
 
+// Draw a layer on an image
 void null0_draw_layer_on_image(unsigned int dst, unsigned int map, char* layerName, int posX, int posY) {
-  // TODO: STUB
+  cute_tiled_layer_t* layer = pntr_tiled_layer(maps[map], layerName);
+  pntr_draw_tiled_layer_tilelayer(images[dst], maps[map], layer, posX, posY, null0_pntr_color(tint));
 }
 
+// Update the animations for the map.
 void null0_update_map(unsigned int map, float deltaTime) {
-  // TODO: STUB
+  pntr_update_tiled(maps[map], deltaTime);
 }
 
+// Get the tile-id for a tile at a coordinate on a layer
 unsigned int null0_layer_get_gid(unsigned int map, char* layerName, unsigned int column, unsigned int row) {
-  // TODO: STUB
-  return {0};
+  cute_tiled_layer_t* layer = pntr_tiled_layer(maps[map], layerName);
+  return pntr_layer_tile(layer, column, row);
 }
 
+// Set a tile to a specific tile-id, on a layer
 void null0_layer_set_gid(unsigned int map, char* layerName, unsigned int column, unsigned int row, unsigned int gid) {
-  // TODO: STUB
+  cute_tiled_layer_t* layer = pntr_tiled_layer(maps[map], layerName);
+  pntr_set_layer_tile(layer, column, row, gid);
 }
 
+// Load a sound from a file in cart
 unsigned int null0_load_sound(char* filename) {
-  // TODO: STUB
-  return {0};
+  return null0_add_sound(pntr_load_sound(filename));
 }
 
+// Play a sound
 void null0_play_sound(unsigned int sound, bool loop) {
-  // TODO: STUB
+  pntr_play_sound(sounds[sound], loop);
 }
 
+// Stop a sound
 void null0_stop_sound(unsigned int sound) {
-  // TODO: STUB
+  pntr_stop_sound(sounds[sound]);
 }
 
+// Create a new sound-effect from some sfxr params
 unsigned int null0_new_sfx(SfxParams params) {
-  // TODO: STUB
-  return {0};
+  return null0_add_sound(pntr_app_sfx_sound(null0app, &params));
 }
 
+// Generate randomized preset sfxr params
 SfxParams null0_preset_sfx(SfxPresetType type) {
-  // TODO: STUB
-  return {0};
+  switch (type) {
+    case SFX_COIN:
+      pntr_app_sfx_gen_pickup_coin(null0_app, params);
+      break;
+    case SFX_LASER:
+      pntr_app_sfx_gen_laser_shoot(null0_app, params);
+    case SFX_EXPLOSION:
+      pntr_app_sfx_gen_explosion(null0_app, params);
+      break;
+    case SFX_POWERUP:
+      pntr_app_sfx_gen_powerup(null0_app, params);
+      break;
+    case SFX_HURT:
+      pntr_app_sfx_gen_hit_hurt(null0_app, params);
+      break;
+    case SFX_JUMP:
+      pntr_app_sfx_gen_jump(null0_app, params);
+      break;
+    case SFX_SELECT:
+      pntr_app_sfx_gen_blip_select(null0_app, params);
+      break;
+    case SFX_SYNTH:
+      pntr_app_sfx_gen_synth(null0_app, params);
+      break;
+    default:
+      printf("preset_sfx: no type!\n");
+  }
 }
 
+// Create a new sfxr from a .rfx file
 SfxParams null0_load_sfx(char* filename) {
-  // TODO: STUB
-  return {0};
+  SfxParams* out = malloc(sizeof(SfxParams));
+  pntr_app_sfx_load_params(&out, filename);
+  return *out;
 }
 
+// Unload a sound
 void null0_unload_sound(unsigned int sound) {
-  // TODO: STUB
+  pntr_unload_sound(sounds[sound]);
 }
 
+// Has the key been pressed? (tracks unpress/read correctly)
 bool null0_key_pressed(pntr_app_key key) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_key_pressed(null0_app, key);
 }
 
+// Is the key currently down?
 bool null0_key_down(pntr_app_key key) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_key_down(null0_app, key);
 }
 
+// Has the key been released? (tracks press/read correctly)
 bool null0_key_released(pntr_app_key key) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_key_released(null0_app, key);
 }
 
+// Is the key currently up?
 bool null0_key_up(pntr_app_key key) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_key_up(null0_app, key);
 }
 
-bool null0_gamepad_button_pressed(int gamepad, pntr_app_gamepad_button button) {
-  // TODO: STUB
-  return {0};
+// Has the button been pressed? (tracks unpress/read correctly)
+bool null0_gamepad_button_pressed(int32_t gamepad, pntr_app_gamepad_button button) {
+  return pntr_app_gamepad_button_pressed(null0_app, gamepad, button);
 }
 
-bool null0_gamepad_button_down(int gamepad, pntr_app_gamepad_button button) {
-  // TODO: STUB
-  return {0};
+// Is the button currently down?
+bool null0_gamepad_button_down(int32_t gamepad, pntr_app_gamepad_button button) {
+  return pntr_app_gamepad_button_down(null0_app, gamepad, button);
 }
 
-bool null0_gamepad_button_released(int gamepad, pntr_app_gamepad_button button) {
-  // TODO: STUB
-  return {0};
+// Has the button been released? (tracks press/read correctly)
+bool null0_gamepad_button_released(int32_t gamepad, pntr_app_gamepad_button button) {
+  return pntr_app_gamepad_button_released(null0_app, gamepad, button);
 }
 
+// Get current position of mouse
 pntr_vector null0_mouse_position() {
-  // TODO: STUB
-  return {0};
+  pntr_vector r = {
+      .x = pntr_app_mouse_x(null0_app),
+      .y = pntr_app_mouse_y(null0_app)};
+  return r;
 }
 
+// Has the button been pressed? (tracks unpress/read correctly)
 bool null0_mouse_button_pressed(pntr_app_mouse_button button) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_mouse_button_pressed(null0_app, button);
 }
 
+// Is the button currently down?
 bool null0_mouse_button_down(pntr_app_mouse_button button) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_mouse_button_down(null0_app, button);
 }
 
+// Has the button been released? (tracks press/read correctly)
 bool null0_mouse_button_released(pntr_app_mouse_button button) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_mouse_button_released(null0_app, button);
 }
 
+// Is the button currently up?
 bool null0_mouse_button_up(pntr_app_mouse_button button) {
-  // TODO: STUB
-  return {0};
+  return pntr_app_mouse_button_up(null0_app, button);
 }
 
+// Create a new blank image
 unsigned int null0_new_image(int width, int height, Null0Color color) {
-  // TODO: STUB
-  return {0};
+  return null0_add_image(pntr_gen_image_color(width, height, null0_pntr_color(color)));
 }
 
+// Copy an image to a new image
 unsigned int null0_image_copy(unsigned int image) {
-  // TODO: STUB
-  return {0};
+  return null0_add_image(pntr_image_copy(images[image]));
 }
 
+// Create an image from a region of another image
 unsigned int null0_image_subimage(unsigned int image, int x, int y, int width, int height) {
-  // TODO: STUB
-  return {0};
+  return null0_add_image(pntr_image_subimage(images[image], x, y, width, height));
 }
 
+// Clear the screen
 void null0_clear(Null0Color color) {
-  // TODO: STUB
+  pntr_clear_background(images[0], null0_pntr_color(color));
 }
 
+// Draw a single pixel on the screen
 void null0_draw_point(int x, int y, Null0Color color) {
-  // TODO: STUB
+  pntr_draw_point(images[0], x, y, null0_pntr_color(color));
 }
 
+// Draw a line on the screen
 void null0_draw_line(int startPosX, int startPosY, int endPosX, int endPosY, Null0Color color) {
-  // TODO: STUB
+  pntr_draw_line(images[0], startPosX, startPosY, endPosX, endPosY, null0_pntr_color(color));
 }
 
+// Draw a filled rectangle on the screen
 void null0_draw_rectangle(int posX, int posY, int width, int height, Null0Color color) {
-  // TODO: STUB
+  pntr_draw_rectangle_fill(images[0], posX, posY, width, height, null0_pntr_color(color));
 }
 
+// Draw a filled triangle on the screen
 void null0_draw_triangle(int x1, int y1, int x2, int y2, int x3, int y3, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled ellipse on the screen
 void null0_draw_ellipse(int centerX, int centerY, int radiusX, int radiusY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled circle on the screen
 void null0_draw_circle(int centerX, int centerY, int radius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled polygon on the screen
 void null0_draw_polygon(pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw several lines on the screen
 void null0_draw_polyline(pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled arc on the screen
 void null0_draw_arc(int centerX, int centerY, float radius, float startAngle, float endAngle, int segments, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled round-rectangle on the screen
 void null0_draw_rectangle_rounded(int x, int y, int width, int height, int cornerRadius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw an image on the screen
 void null0_draw_image(unsigned int src, int posX, int posY) {
   // TODO: STUB
 }
 
+// Draw a tinted image on the screen
 void null0_draw_image_tint(unsigned int src, int posX, int posY, Null0Color tint) {
   // TODO: STUB
 }
 
+// Draw an image, rotated, on the screen
 void null0_draw_image_rotated(unsigned int src, int posX, int posY, float degrees, float offsetX, float offsetY, pntr_filter filter) {
   // TODO: STUB
 }
 
+// Draw an image, flipped, on the screen
 void null0_draw_image_flipped(unsigned int src, int posX, int posY, bool flipHorizontal, bool flipVertical, bool flipDiagonal) {
   // TODO: STUB
 }
 
+// Draw an image, scaled, on the screen
 void null0_draw_image_scaled(unsigned int src, int posX, int posY, float scaleX, float scaleY, float offsetX, float offsetY, pntr_filter filter) {
   // TODO: STUB
 }
 
+// Draw some text on the screen
 void null0_draw_text(unsigned int font, char* text, int posX, int posY, Null0Color color) {
   // TODO: STUB
 }
 
+// Save an image to persistant storage
 void null0_save_image(unsigned int image, char* filename) {
   // TODO: STUB
 }
 
+// Load an image from a file in cart
 unsigned int null0_load_image(char* filename) {
   // TODO: STUB
   return {0};
 }
 
+// Resize an image, in-place
 void null0_image_resize(unsigned int image, int newWidth, int newHeight, int offsetX, int offsetY, Null0Color fill) {
   // TODO: STUB
 }
 
+// Scale an image, in-place
 void null0_image_scale(unsigned int image, float scaleX, float scaleY, pntr_filter filter) {
   // TODO: STUB
 }
 
+// Replace a color in an image, in-place
 void null0_image_color_replace(unsigned int image, Null0Color color, Null0Color replace) {
   // TODO: STUB
 }
 
+// Tint a color in an image, in-place
 void null0_image_color_tint(unsigned int image, Null0Color color) {
   // TODO: STUB
 }
 
+// Fade a color in an image, in-place
 void null0_image_color_fade(unsigned int image, float alpha) {
   // TODO: STUB
 }
 
+// Copy a font to a new font
 unsigned int null0_font_copy(unsigned int font) {
   // TODO: STUB
   return {0};
 }
 
+// Scale a font, return a new font
 unsigned int null0_font_scale(unsigned int font, float scaleX, float scaleY, pntr_filter filter) {
   // TODO: STUB
   return {0};
 }
 
+// Load a BMF font from a file in cart
 unsigned int null0_load_font_bmf(char* filename, char* characters) {
   // TODO: STUB
   return {0};
 }
 
+// Load a BMF font from an image
 unsigned int null0_load_font_bmf_from_image(unsigned int image, char* characters) {
   // TODO: STUB
   return {0};
 }
 
+// Measure the size of some text
 pntr_vector null0_measure_text(unsigned int font, char* text) {
   // TODO: STUB
   return {0};
 }
 
+// Meaure an image (use 0 for screen)
 pntr_vector null0_measure_image(unsigned int image) {
   // TODO: STUB
   return {0};
 }
 
+// Load a TTY font from a file in cart
 unsigned int null0_load_font_tty(char* filename, int glyphWidth, int glyphHeight, char* characters) {
   // TODO: STUB
   return {0};
 }
 
+// Load a TTY font from an image
 unsigned int null0_load_font_tty_from_image(unsigned int image, int glyphWidth, int glyphHeight, char* characters) {
   // TODO: STUB
   return {0};
 }
 
+// Load a TTF font from a file in cart
 unsigned int null0_load_font_ttf(char* filename, int fontSize) {
   // TODO: STUB
   return {0};
 }
 
+// Invert the colors in an image, in-place
 void null0_image_color_invert(unsigned int image) {
   // TODO: STUB
 }
 
+// Calculate a rectangle representing the available alpha border in an image
 pntr_rectangle null0_image_alpha_border(unsigned int image, float threshold) {
   // TODO: STUB
   return {0};
 }
 
+// Crop an image, in-place
 void null0_image_crop(unsigned int image, int x, int y, int width, int height) {
   // TODO: STUB
 }
 
+// Crop an image based on the alpha border, in-place
 void null0_image_alpha_crop(unsigned int image, float threshold) {
   // TODO: STUB
 }
 
+// Adjust the brightness of an image, in-place
 void null0_image_color_brightness(unsigned int image, float factor) {
   // TODO: STUB
 }
 
+// Flip an image, in-place
 void null0_image_flip(unsigned int image, bool horizontal, bool vertical) {
   // TODO: STUB
 }
 
+// Change the contrast of an image, in-place
 void null0_image_color_contrast(unsigned int image, float contrast) {
   // TODO: STUB
 }
 
+// Use an image as an alpha-mask on another image
 void null0_image_alpha_mask(unsigned int image, unsigned int alphaMask, int posX, int posY) {
   // TODO: STUB
 }
 
+// Create a new image, rotating another image
 unsigned int null0_image_rotate(unsigned int image, float degrees, pntr_filter filter) {
   // TODO: STUB
   return {0};
 }
 
+// Create a new image of a gradient
 unsigned int null0_image_gradient(int width, int height, Null0Color topLeft, Null0Color topRight, Null0Color bottomLeft, Null0Color bottomRight) {
   // TODO: STUB
   return {0};
 }
 
+// Unload an image
 void null0_unload_image(unsigned int image) {
   // TODO: STUB
 }
 
+// Unload a font
 void null0_unload_font(unsigned int font) {
   // TODO: STUB
 }
 
+// Clear an image
 void null0_clear_on_image(unsigned int destination, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a single pixel on an image
 void null0_draw_point_on_image(unsigned int destination, int x, int y, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a line on an image
 void null0_draw_line_on_image(unsigned int destination, int startPosX, int startPosY, int endPosX, int endPosY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled rectangle on an image
 void null0_draw_rectangle_on_image(unsigned int destination, int posX, int posY, int width, int height, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled triangle on an image
 void null0_draw_triangle_on_image(unsigned int destination, int x1, int y1, int x2, int y2, int x3, int y3, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled ellipse on an image
 void null0_draw_ellipse_on_image(unsigned int destination, int centerX, int centerY, int radiusX, int radiusY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a circle on an image
 void null0_draw_circle_on_image(unsigned int destination, int centerX, int centerY, int radius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled polygon on an image
 void null0_draw_polygon_on_image(unsigned int destination, pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw several lines on an image
 void null0_draw_polyline_on_image(unsigned int destination, pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a filled round-rectangle on an image
 void null0_draw_rectangle_rounded_on_image(unsigned int destination, int x, int y, int width, int height, int cornerRadius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw an image on an image
 void null0_draw_image_on_image(unsigned int destination, unsigned int src, int posX, int posY) {
   // TODO: STUB
 }
 
+// Draw a tinted image on an image
 void null0_draw_image_tint_on_image(unsigned int destination, unsigned int src, int posX, int posY, Null0Color tint) {
   // TODO: STUB
 }
 
+// Draw an image, rotated, on an image
 void null0_draw_image_rotated_on_image(unsigned int destination, unsigned int src, int posX, int posY, float degrees, float offsetX, float offsetY, pntr_filter filter) {
   // TODO: STUB
 }
 
+// Draw an image, flipped, on an image
 void null0_draw_image_flipped_on_image(unsigned int destination, unsigned int src, int posX, int posY, bool flipHorizontal, bool flipVertical, bool flipDiagonal) {
   // TODO: STUB
 }
 
+// Draw an image, scaled, on an image
 void null0_draw_image_scaled_on_image(unsigned int destination, unsigned int src, int posX, int posY, float scaleX, float scaleY, float offsetX, float offsetY, pntr_filter filter) {
   // TODO: STUB
 }
 
+// Draw some text on an image
 void null0_draw_text_on_image(unsigned int destination, unsigned int font, char* text, int posX, int posY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined rectangle on the screen
 void null0_draw_rectangle_outline(int posX, int posY, int width, int height, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined triangle on the screen
 void null0_draw_triangle_outline(int x1, int y1, int x2, int y2, int x3, int y3, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined ellipse on the screen
 void null0_draw_ellipse_outline(int centerX, int centerY, int radiusX, int radiusY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined circle on the screen
 void null0_draw_circle_outline(int centerX, int centerY, int radius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined polygon on the screen
 void null0_draw_polygon_outline(pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined arc on the screen
 void null0_draw_arc_outline(int centerX, int centerY, float radius, float startAngle, float endAngle, int segments, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined round-rectangle on the screen
 void null0_draw_rectangle_rounded_outline(int x, int y, int width, int height, int cornerRadius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined rectangle on an image
 void null0_draw_rectangle_outline_on_image(unsigned int destination, int posX, int posY, int width, int height, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined triangle on an image
 void null0_draw_triangle_outline_on_image(unsigned int destination, int x1, int y1, int x2, int y2, int x3, int y3, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined ellipse on an image
 void null0_draw_ellipse_outline_on_image(unsigned int destination, int centerX, int centerY, int radiusX, int radiusY, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined circle on an image
 void null0_draw_circle_outline_on_image(unsigned int destination, int centerX, int centerY, int radius, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined polygon on an image
 void null0_draw_polygon_outline_on_image(unsigned int destination, pntr_vector[] points, int numPoints, Null0Color color) {
   // TODO: STUB
 }
 
+// Draw a 1px outlined round-rectangle on an image
 void null0_draw_rectangle_rounded_outline_on_image(unsigned int destination, int x, int y, int width, int height, int cornerRadius, Null0Color color) {
   // TODO: STUB
 }
 
+// Read a file from cart (or local persistant)
 unsigned char* null0_file_read(char* filename, unsigned int* bytesRead) {
   // TODO: STUB
   return {0};
 }
 
+// Write a file to persistant storage
 bool null0_file_write(char* filename, unsigned char* data, unsigned int byteSize) {
   // TODO: STUB
   return {0};
 }
 
+// Write a file to persistant storage, appending to the end
 bool null0_file_append(char* filename, unsigned char* data, unsigned int byteSize) {
   // TODO: STUB
   return {0};
 }
 
+// Get info about a single file
 PHYSFS_Stat null0_file_info(char* filename) {
   // TODO: STUB
   return {0};
 }
 
+// Get list of files in a directory
 char** null0_file_list(char* dir) {
   // TODO: STUB
   return {0};
 }
 
+// Get the user's writable dir (where file writes or appends go)
 char* null0_get_write_dir() {
   // TODO: STUB
   return {0};
 }
 
+// Tint a color with another color
 Null0Color null0_color_tint(Null0Color color, Null0Color tint) {
   // TODO: STUB
   return {0};
 }
 
+// Fade a color
 Null0Color null0_color_fade(Null0Color color, float alpha) {
   // TODO: STUB
   return {0};
 }
 
+// Change the brightness of a color
 Null0Color null0_color_brightness(Null0Color color, float factor) {
   // TODO: STUB
   return {0};
 }
 
+// Invert a color
 Null0Color null0_color_invert(Null0Color color) {
   // TODO: STUB
   return {0};
 }
 
+// Blend 2 colors together
 Null0Color null0_color_alpha_blend(Null0Color dst, Null0Color src) {
   // TODO: STUB
   return {0};
 }
 
+// Change contrast of a color
 Null0Color null0_color_contrast(Null0Color color, float contrast) {
   // TODO: STUB
   return {0};
 }
 
+// Interpolate colors
 Null0Color null0_color_bilinear_interpolate(Null0Color color00, Null0Color color01, Null0Color color10, Null0Color color11, float coordinateX, float coordinateY) {
   // TODO: STUB
   return {0};
@@ -846,21 +1014,18 @@ void cart_ret_set_MouseButton(pntr_app_mouse_button value) {
 }
 
 void cart_ret_set_Vector_array(pntr_vector[] value, unsigned int len) {
-  // TODO: STUB
-  memcpy(&cart_shared.data + cart_ret_offset, &pntr_vector[], 0);
-  cart_ret_offset += len;
+  memcpy(&cart_shared.data + cart_ret_offset, &pntr_vector[], len * sizeof(pntr_vector));
+  cart_ret_offset += (len * sizeof(pntr_vector));
   cart_shared.size = cart_ret_offset;
 }
 
 void cart_ret_set_ImageFilter(pntr_filter value) {
-  // TODO: STUB
   memcpy(&cart_shared.data + cart_ret_offset, &pntr_filter, 4);
   cart_ret_offset += 4;
   cart_shared.size = cart_ret_offset;
 }
 
 void cart_ret_set_Font(unsigned int value) {
-  // TODO: STUB
   memcpy(&cart_shared.data + cart_ret_offset, &unsigned int, 4);
   cart_ret_offset += 4;
   cart_shared.size = cart_ret_offset;
@@ -874,8 +1039,7 @@ void cart_ret_set_u32_pointer(unsigned int* value) {
 }
 
 void cart_ret_set_bytes(unsigned char* value, unsigned int len) {
-  // TODO: STUB
-  memcpy(&cart_shared.data + cart_ret_offset, unsigned char*, 0);
+  memcpy(&cart_shared.data + cart_ret_offset, unsigned char*, len);
   cart_ret_offset += len;
   cart_shared.size = cart_ret_offset;
 }
