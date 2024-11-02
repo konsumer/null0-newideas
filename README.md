@@ -4,7 +4,7 @@ Ideas I am exploring here:
 - host & cart share access to same filesystem
 - very simple make-based build system (might update to cmake/xmake later.) I just included headers & stuff.
 - clearer distinct types in api/
-- new Tiled API
+- new Tiled map API
 - simpler type system (over WASM)
 - maybe move to framebuffer/oss/input WASI virtual devices, at some point
 - simple `call` router and utils to copy args/returns

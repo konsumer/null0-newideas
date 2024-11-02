@@ -33,16 +33,16 @@ docs/cartas.null0: cart/as/assembly/*.ts cart/assets/*
 	cd ../.. && \
 	./cart/buildcart.sh docs/cartas.null0 cart/as/build/release.wasm cart/assets/*
 
-cart-as: docs/cartas.null0 ## Build a cart made with AssemblyScript
+cart-as: docs/cartas.null0 ## Build an example cart made with AssemblyScript
 
-cart-c: docs/cartc.null0 ## Build a cart made with C
+cart-c: docs/cartc.null0 ## Build an example cart made with C
 
-carts: cart-as cart-c ## Build both carts
+carts: cart-as cart-c ## Build all carts
 
 clean: ## Delete any built files
 	rm -f null0 docs/*.mjs docs/*.wasm docs/*.null0 host/build cartc/build cartas/build
 
-native: null0 ## Build native null0 runtime
+native: null0 ## Build native null0 host
 
 null0: host/*
 	cd host && \
@@ -51,7 +51,5 @@ null0: host/*
 run: web ## Run the web host locally
 	npx -y live-server docs
 
-web: docs/host.mjs carts ## Build the webhost
-
-
+web: docs/host.mjs carts ## Build the web host
 

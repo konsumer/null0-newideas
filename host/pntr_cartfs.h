@@ -1,4 +1,5 @@
 // import this before pntr.h to setup cartfs
+// uses node-like fs in Module.cartfs for emscriptem, and physfs for native
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>

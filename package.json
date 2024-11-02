@@ -1,5 +1,9 @@
 {
+  "type": "module",
   "devDependencies": {
     "yaml": "^2.6.0"
+  },
+  "dependencies": {
+    "glob": "^11.0.0"
   }
 }

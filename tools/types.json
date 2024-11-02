@@ -1,0 +1,268 @@
+{
+  "string": {
+    "name": "string",
+    "host": "char*",
+    "cart": {
+      "c": "char*",
+      "assemblyscript": "string"
+    },
+    "size": 0
+  },
+  "i32": {
+    "name": "i32",
+    "host": "int",
+    "cart": {
+      "c": "i32",
+      "assemblyscript": "i32"
+    },
+    "size": 4
+  },
+  "TileMap": {
+    "name": "TileMap",
+    "host": "unsigned int",
+    "cart": {
+      "c": "unsigned int",
+      "assemblyscript": "u32"
+    },
+    "size": 4
+  },
+  "Color": {
+    "name": "Color",
+    "host": "Null0Color",
+    "cart": {
+      "c": "Color",
+      "assemblyscript": "Color"
+    },
+    "size": 4
+  },
+  "Image": {
+    "name": "Image",
+    "host": "unsigned int",
+    "cart": {
+      "c": "unsigned int",
+      "assemblyscript": "u32"
+    },
+    "size": 4
+  },
+  "u32": {
+    "name": "u32",
+    "host": "unsigned int",
+    "cart": {
+      "c": "unsigned int",
+      "assemblyscript": "u32"
+    },
+    "size": 4
+  },
+  "f32": {
+    "name": "f32",
+    "host": "float",
+    "cart": {
+      "c": "float",
+      "assemblyscript": "f32"
+    },
+    "size": 4
+  },
+  "Sound": {
+    "name": "Sound",
+    "host": "unsigned int",
+    "cart": {
+      "c": "unsigned int",
+      "assemblyscript": "u32"
+    },
+    "size": 4
+  },
+  "bool": {
+    "name": "bool",
+    "host": "bool",
+    "cart": {
+      "c": "bool",
+      "assemblyscript": "bool"
+    },
+    "size": 1
+  },
+  "SfxParams": {
+    "name": "SfxParams",
+    "host": "SfxParams",
+    "cart": {
+      "c": "SfxParams",
+      "assemblyscript": "SfxParams"
+    },
+    "size": 96
+  },
+  "SfxPresetType": {
+    "name": "SfxPresetType",
+    "host": "SfxPresetType",
+    "cart": {
+      "c": "SfxPresetType",
+      "assemblyscript": "SfxPresetType"
+    },
+    "size": 4
+  },
+  "Key": {
+    "name": "Key",
+    "host": "pntr_app_key",
+    "cart": {
+      "c": "Key",
+      "assemblyscript": "Key"
+    },
+    "size": 4
+  },
+  "GamepadButton": {
+    "name": "GamepadButton",
+    "host": "pntr_app_gamepad_button",
+    "cart": {
+      "c": "GamepadButton",
+      "assemblyscript": "GamepadButton"
+    },
+    "size": 4
+  },
+  "MouseButton": {
+    "name": "MouseButton",
+    "host": "pntr_app_mouse_button",
+    "cart": {
+      "c": "MouseButton",
+      "assemblyscript": "MouseButton"
+    },
+    "size": 4
+  },
+  "Vector[]": {
+    "name": "Vector_array",
+    "host": "pntr_vector[]",
+    "cart": {
+      "c": "Vector[]",
+      "assemblyscript": "Vector[]"
+    },
+    "size": 0
+  },
+  "ImageFilter": {
+    "name": "ImageFilter",
+    "host": "pntr_filter",
+    "cart": {
+      "c": "ImageFilter",
+      "assemblyscript": "ImageFilter"
+    },
+    "size": 4
+  },
+  "Font": {
+    "name": "Font",
+    "host": "unsigned int",
+    "cart": {
+      "c": "unsigned int",
+      "assemblyscript": "unsigned int"
+    },
+    "size": 4
+  },
+  "u32*": {
+    "name": "u32_pointer",
+    "host": "unsigned int*",
+    "cart": {
+      "c": "unsigned int*",
+      "assemblyscript": "u32*"
+    },
+    "size": 4
+  },
+  "bytes": {
+    "name": "bytes",
+    "host": "unsigned char*",
+    "cart": {
+      "c": "unsigned char*",
+      "assemblyscript": "Uint8Array"
+    },
+    "size": 0
+  },
+  "void": {
+    "name": "void",
+    "host": "void",
+    "cart": {
+      "c": "void",
+      "assemblyscript": "void"
+    },
+    "size": 0
+  },
+  "u64": {
+    "name": "u64",
+    "host": "uint64_t",
+    "cart": {
+      "c": "uint64_t",
+      "assemblyscript": "u64"
+    },
+    "size": 8
+  },
+  "Vector": {
+    "name": "Vector",
+    "host": "pntr_vector",
+    "cart": {
+      "c": "Vector",
+      "assemblyscript": "Vector"
+    },
+    "size": 8
+  },
+  "Rectangle": {
+    "name": "Rectangle",
+    "host": "pntr_rectangle",
+    "cart": {
+      "c": "Rectangle",
+      "assemblyscript": "Rectangle"
+    },
+    "size": 16
+  },
+  "FileInfo": {
+    "name": "FileInfo",
+    "host": "PHYSFS_Stat",
+    "cart": {
+      "c": "FileInfo",
+      "assemblyscript": "FileInfo"
+    },
+    "size": 40
+  },
+  "string[]": {
+    "name": "string_array",
+    "host": "char**",
+    "cart": {
+      "c": "char**",
+      "assemblyscript": "string[]"
+    },
+    "size": 0
+  },
+  "args": [
+    "string",
+    "i32",
+    "TileMap",
+    "Color",
+    "Image",
+    "u32",
+    "f32",
+    "Sound",
+    "bool",
+    "SfxParams",
+    "SfxPresetType",
+    "Key",
+    "GamepadButton",
+    "MouseButton",
+    "Vector[]",
+    "ImageFilter",
+    "Font",
+    "u32*",
+    "bytes"
+  ],
+  "returns": [
+    "void",
+    "u64",
+    "f32",
+    "i32",
+    "TileMap",
+    "u32",
+    "Sound",
+    "SfxParams",
+    "bool",
+    "Vector",
+    "Image",
+    "Font",
+    "Rectangle",
+    "bytes",
+    "FileInfo",
+    "string[]",
+    "string",
+    "Color"
+  ]
+}
